@@ -1,8 +1,6 @@
 # Platform for event management and online ticket sales
 
-## This platform is a comprehensive solution that enables administrators to add and edit events, while users can intuitively browse available offers, performers, and purchase tickets online. The application is modular and scalable, allowing for further development and integration of additional functionalities.
-
----
+### This platform is a comprehensive solution that enables administrators to add and edit events, while users can intuitively browse available offers, performers, and purchase tickets online. The application is modular and scalable, allowing for further development and integration of additional functionalities.
 
 ## 🚀 Features
 
