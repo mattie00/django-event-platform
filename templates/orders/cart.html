@@ -1,0 +1,51 @@
+{% extends "main/base.html" %}
+{% block title %}Koszyk{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-5 mb-4">Koszyk</h1>
+
+    {% if cart_items %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Wydarzenie</th>
+                    <th>Pula biletów</th>
+                    <th>Ilość</th>
+                    <th>Cena</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.ticket_pool.event.name }}</td>
+                    <td>{{ item.ticket_pool.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.price|default:item.ticket_pool.current_price }} zł</td>
+                    <td>
+                        <a href="{% url 'orders:remove_from_cart' item.ticket_pool.id %}" class="btn btn-danger btn-sm">Usuń</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="d-flex justify-content-between">
+            <strong>Łączna cena: {{ total_price|floatformat:2 }} zł</strong>
+            <a href="{% url 'orders:checkout' %}" class="btn btn-success">Złóż zamówienie</a>
+        </div>
+    {% else %}
+        <p>Koszyk jest pusty.</p>
+    {% endif %}
+
+    {% if messages %}
+      {% for message in messages %}
+        {% if 'cart_view' in message.tags or 'remove_from_cart' in message.tags %}
+          <div class="alert alert-info {{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

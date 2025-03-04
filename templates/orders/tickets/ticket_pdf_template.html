@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Bilet</title>
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; line-height: 1.6; margin: 0; padding: 0; }
+        .ticket { border: 2px solid #000; padding: 20px; margin: 20px auto; width: 80%; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2); }
+        .ticket-header { text-align: center; margin-bottom: 20px; }
+        .ticket-header h1 { margin: 0; font-size: 20px; }
+        .ticket-details { margin-bottom: 15px; }
+        .ticket-details p { margin: 5px 0; font-size: 14px; }
+        .qr-code { text-align: center; margin-top: 15px; }
+        .page-break { page-break-after: always; }
+        .highlight { font-weight: bold; color: #2C3E50; }
+        .footer { font-size: 12px; text-align: center; margin-top: 10px; color: #666; }
+    </style>
+</head>
+<body>
+{% for t in tickets %}
+    <div class="ticket">
+        <div class="ticket-header">
+            <h1>Bilet na Wydarzenie: <span class="highlight">{{ t.ticket.order_item.ticket_pool.event.name }}</span></h1>
+            <p>Numer zamówienia: <span class="highlight">{{ t.ticket.order_item.order.id }}</span></p>
+        </div>
+        <div class="ticket-details">
+            <p><strong>Data i godzina:</strong> {{ t.ticket.order_item.ticket_pool.event.date|date:"d-m-Y" }} o {{ t.ticket.order_item.ticket_pool.event.date|time }}</p>
+            <p><strong>Miejsce:</strong> {{ t.ticket.order_item.ticket_pool.event.location }}, {{ t.ticket.order_item.ticket_pool.event.address }}</p>
+            <p><strong>Imię i nazwisko:</strong> {{ t.ticket.first_name }} {{ t.ticket.last_name }}</p>
+            <p><strong>Numer biletu:</strong> {{ t.ticket.ticket_number }}</p>
+            <p><strong>Pula biletów:</strong> {{ t.ticket.order_item.ticket_pool.name }}</p>
+            <p><strong>Organizator:</strong> {{ t.ticket.order_item.ticket_pool.event.organizer }}</p>
+            <p><strong>Kategoria wydarzenia:</strong> {{ t.ticket.order_item.ticket_pool.event.category }}</p>
+            <p><strong>Metoda płatności:</strong> {{ t.ticket.order_item.order.get_payment_method_display }}</p>
+        </div>
+        <div class="qr-code">
+            <p><strong>Kod QR:</strong></p>
+            <img src="data:image/png;base64,{{ t.ticket.qr_code }}" alt="QR Code"/>
+        </div>
+        <div class="footer">
+            <p>Proszę zachować bilet do kontroli. Bilet jest ważny tylko na wydarzenie {{ t.ticket.order_item.ticket_pool.event.name }} w dniu {{ t.ticket.order_item.ticket_pool.event.date|date:"d-m-Y" }}.</p>
+        </div>
+    </div>
+    <div class="page-break"></div>
+{% endfor %}
+</body>
+</html>

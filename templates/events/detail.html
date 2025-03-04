@@ -1,0 +1,254 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% block title %}{{ event.name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="position-relative mb-5">
+        <img src="{% if event.image %}{{ event.image.url }}{% else %}https://via.placeholder.com/600x400{% endif %}"
+             alt="{{ event.name }}"
+             class="img-fluid rounded shadow-sm"
+             style="width: 100%; height: 400px; object-fit: cover;">
+        <div class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center" style="background: rgba(0, 0, 0, 0.4);">
+            <h1 class="text-white display-4">{{ event.name }}</h1>
+            {% if event.is_featured %}
+                <span class="badge bg-warning text-dark fs-6 mt-2">Wyróżnione Wydarzenie</span>
+            {% endif %}
+            {% if event.short_description %}
+                <p class="text-white fs-5 mt-3">{{ event.short_description }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-info-circle text-primary me-2"></i>Szczegóły Wydarzenia</h5>
+                    <hr>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3"><i class="fas fa-calendar-alt me-2 text-primary"></i><strong>Data:</strong> {{ event.date|date:"D, d.m.Y, H:i" }}</li>
+                        <li class="mb-3"><i class="fas fa-stopwatch me-2 text-primary"></i><strong>Koniec sprzedaży:</strong> {{ event.ticket_sales_end|date:"D, d.m.Y, H:i" }}</li>
+                        <li class="mb-3"><i class="fas fa-map-marker-alt me-2 text-primary"></i><strong>Lokalizacja:</strong> {{ event.location }}, {{ event.address }}</li>
+                        <li class="mb-3"><i class="fas fa-building me-2 text-primary"></i><strong>Klub:</strong> {{ event.club_name }}</li>
+                        {% if event.organizer %}
+                            <li class="mb-3"><i class="fas fa-user-tie me-2 text-primary"></i><strong>Organizator:</strong> {{ event.organizer }}</li>
+                        {% endif %}
+                        <li class="mb-3"><i class="fas fa-tags me-2 text-primary"></i><strong>Kategoria:</strong> {{ event.category.name }}</li>
+                        {% if event.min_age %}
+                            <li class="mb-3"><i class="fas fa-user me-2 text-primary"></i><strong>Minimalny wiek:</strong> {{ event.min_age }}+</li>
+                        {% endif %}
+                        {% if event.is_recurring %}
+                            <li class="mb-3"><i class="fas fa-sync-alt me-2 text-primary"></i><strong>Cykliczność:</strong> {{ event.get_recurrence_pattern_display }}
+                                {% if event.recurrence_end_date %}
+                                    <br><small>(do {{ event.recurrence_end_date|date:"D, d.m.Y, H:i" }})</small>
+                                {% endif %}
+                            </li>
+                        {% endif %}
+                        <li class="mb-3"><i class="fas fa-info-circle me-2 text-primary"></i><strong>Status:</strong> {{ event.get_event_status }}</li>
+                        <li class="mb-3"><i class="fas fa-eye me-2 text-primary"></i><strong>Odwiedzin:</strong> {{ event.views_count }}</li>
+                        <li class="mb-3"><i class="fas fa-users me-2 text-primary"></i><strong>Maks. uczestników:</strong> {{ event.max_attendees }}</li>
+                    </ul>
+                </div>
+                {% if event.tags.all %}
+                    <div class="card-footer">
+                        <h6><i class="fas fa-hashtag me-2 text-primary"></i>Tagi:</h6>
+                        <div class="d-flex flex-wrap">
+                        {% for tag in event.tags.all %}
+                            <span class="badge bg-primary me-1">{{ tag.name }}</span>
+                        {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-align-left text-primary me-2"></i>Opis Wydarzenia</h5>
+                    <hr>
+                    <p class="card-text">{{ event.description }}</p>
+                </div>
+                {% if event.performers.all %}
+                    <div class="card-footer">
+                        <h6><i class="fas fa-music me-2 text-primary"></i>Wykonawcy:</h6>
+                        <div class="d-flex flex-wrap">
+                            {% for performer in event.performers.all %}
+                                <span class="badge bg-success me-2">{{ performer.name }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <h3 class="mb-4"><i class="fas fa-ticket-alt text-primary me-2"></i>Dostępne Bilety</h3>
+
+        {% if dependent_pools %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for ticket_pool in dependent_pools %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-header bg-light">
+                                <h5 class="card-title mb-0 fw-bold">{{ ticket_pool.name }}</h5>
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                <!-- Cena i status -->
+                                {% if ticket_pool.is_last_minute_promo %}
+                                    <p class="card-text mb-1 text-danger">
+                                        <strong>Promocja:</strong> {{ ticket_pool.promo_price }} zł
+                                        <small class="text-muted ms-2">
+                                            <del>{{ ticket_pool.price }} zł</del>
+                                        </small>
+                                    </p>
+                                    <p class="card-text mb-1 text-warning" style="font-size: 0.9rem;">
+                                        <i class="fas fa-clock"></i> Promocja do: {{ ticket_pool.promo_end_date|date:"d.m.Y, H:i" }}
+                                    </p>
+                                {% else %}
+                                    <p class="card-text mb-2">
+                                        <strong>Cena:</strong> {{ ticket_pool.price }} zł
+                                    </p>
+                                {% endif %}
+
+                                {% if ticket_pool.is_locked %}
+                                    <span class="badge bg-secondary mb-2">
+                                        <i class="fas fa-lock me-1"></i> Zablokowana (pojawia się po wyprzedaniu wcześniejszych pul)
+                                    </span>
+                                {% elif ticket_pool.is_sold_out %}
+                                    <span class="badge bg-danger mb-2">
+                                        <i class="fas fa-times-circle me-1"></i> Wyprzedane
+                                    </span>
+                                {% elif ticket_pool.is_sales_pending %}
+                                    <span class="badge bg-warning mb-2">
+                                        <i class="fas fa-hourglass-half me-1"></i> Sprzedaż jeszcze się nie rozpoczęła
+                                    </span>
+                                {% elif ticket_pool.is_sales_ended %}
+                                    <span class="badge bg-secondary mb-2">
+                                        <i class="fas fa-times-circle me-1"></i> Sprzedaż zakończona
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success mb-2">
+                                        <i class="fas fa-check-circle me-1"></i> Dostępne ({{ ticket_pool.remaining_tickets }} biletów)
+                                    </span>
+
+                                    <form method="post" action="{% url 'orders:add_to_cart' %}" class="mt-auto">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="ticket_pool" value="{{ ticket_pool.id }}">
+                                        <div class="input-group">
+                                            <input
+                                                type="number"
+                                                name="quantity"
+                                                class="form-control"
+                                                min="1"
+                                                max="{{ ticket_pool.remaining_tickets|default:ticket_pool.max_tickets_per_user }}"
+                                                value="1"
+                                                style="max-width: 80px;"
+                                            >
+                                            <button type="submit" class="btn btn-primary">Dodaj do koszyka</button>
+                                        </div>
+                                    <p class="text-muted">
+                                        Możesz kupić maksymalnie {{ ticket_pool.max_tickets_per_user }} bilety na osobę.
+                                    </p>
+                                    </form>
+
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                Brak dostępnych puli biletów dla tego wydarzenia.
+            </div>
+        {% endif %}
+
+        {% if independent_pools %}
+            <h4 class="mt-5"><i class="fas fa-star text-warning me-2"></i>Bilety VIP / Premium</h4>
+            <p class="text-muted">Ekskluzywne bilety z dodatkowymi korzyściami, zwykle niezależne od innych pul.</p>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for ticket_pool in independent_pools %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm border-warning">
+                            <div class="card-header bg-warning bg-gradient">
+                                <h5 class="card-title mb-0 fw-bold text-dark">{{ ticket_pool.name }}</h5>
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                {% if ticket_pool.is_last_minute_promo %}
+                                    <p class="card-text mb-1 text-danger">
+                                        <strong>Promocja:</strong> {{ ticket_pool.promo_price }} zł
+                                        <small class="text-muted ms-2">
+                                            <del>{{ ticket_pool.price }} zł</del>
+                                        </small>
+                                    </p>
+                                    <p class="card-text mb-1 text-warning">
+                                        <i class="fas fa-clock"></i> Promocja do: {{ ticket_pool.promo_end_date|date:"d.m.Y, H:i" }}
+                                    </p>
+                                {% else %}
+                                    <p class="card-text mb-2"><strong>Cena:</strong> {{ ticket_pool.price }} zł</p>
+                                {% endif %}
+
+                                {% if ticket_pool.is_sold_out %}
+                                    <span class="badge bg-danger mb-2">
+                                        <i class="fas fa-times-circle me-1"></i> Wyprzedane
+                                    </span>
+                                {% elif ticket_pool.is_sales_pending %}
+                                    <span class="badge bg-warning mb-2">
+                                        <i class="fas fa-hourglass-half me-1"></i> Sprzedaż jeszcze się nie rozpoczęła
+                                    </span>
+                                {% elif ticket_pool.is_sales_ended %}
+                                    <span class="badge bg-secondary mb-2">
+                                        <i class="fas fa-times-circle me-1"></i> Sprzedaż zakończona
+                                    </span>
+                                {% elif ticket_pool.is_sales_active %}
+                                    <span class="badge bg-success mb-2">
+                                        <i class="fas fa-check-circle me-1"></i> Dostępne ({{ ticket_pool.remaining_tickets }} biletów)
+                                    </span>
+                                    <p class="text-muted">
+                                        Możesz kupić maksymalnie {{ ticket_pool.max_tickets_per_user }} bilety na osobę.
+                                    </p>
+
+                                    <form method="post" action="{% url 'orders:add_to_cart' %}" class="mt-auto">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="ticket_pool" value="{{ ticket_pool.id }}">
+                                        <div class="input-group">
+                                            <input
+                                                type="number"
+                                                name="quantity"
+                                                class="form-control"
+                                                min="1"
+                                                max="{{ ticket_pool.remaining_tickets|default:ticket_pool.max_tickets_per_user }}"
+                                                value="1"
+                                            >
+                                            <button type="submit" class="btn btn-warning">Dodaj do koszyka</button>
+                                        </div>
+                                    </form>
+                                {% else %}
+                                    <span class="badge bg-secondary mb-2">
+                                        Niedostępna
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <a href="{% url 'events:list' %}" class="btn btn-secondary me-3">Powrót do listy wydarzeń</a>
+            {% if ticket_pools %}
+                <a href="{% url 'orders:cart' %}" class="btn btn-success">Przejdź do koszyka</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

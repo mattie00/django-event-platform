@@ -1,0 +1,23 @@
+{% if events|length == 0 %}
+    <div class="col-12 text-center">
+        <p>Brak wydarzeń dla wybranego okresu.</p>
+    </div>
+{% elif events|length <= 4 %}
+    <div class="row">
+        {% for event in events %}
+        <div class="col-md-3 mb-4">
+            {% include 'events/partials/event_card.html' with event=event %}
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="horizontal-scroll-container">
+        <div class="row flex-nowrap">
+            {% for event in events %}
+            <div class="col-md-3 mb-4">
+                {% include 'events/partials/event_card.html' with event=event %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}

@@ -1,0 +1,22 @@
+{% extends "main/base.html" %}
+
+{% block title %}Wydarzenia{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Wydarzenia</h1>
+    <p>Odkryj różnorodne wydarzenia dostępne na naszej platformie. Niezależnie od tego, czy szukasz koncertów, spektakli, czy pokazów filmowych – mamy coś dla każdego!</p>
+
+    <h2>Wyszukiwarka wydarzeń</h2>
+    <form action="{% url 'events:list' %}" method="get">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <input type="text" name="query" class="form-control" placeholder="Wpisz nazwę wydarzenia lub artysty">
+            </div>
+            <div class="col-md-3 mb-3">
+                <button type="submit" class="btn btn-primary w-100">Szukaj</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+<div class="row">
+    {% if tag_events %}
+        {% for event in tag_events %}
+            <div class="col-md-3 mb-4">
+                {% include 'events/partials/event_card.html' with event=event %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-muted">Brak wydarzeń dla wybranego tagu.</p>
+    {% endif %}
+</div>

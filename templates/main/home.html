@@ -1,0 +1,568 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}Strona główna{% endblock %}
+
+{% block content %}
+
+<div id="myCarousel" class="carousel slide mb-6 carousel-custom-height" data-bs-ride="carousel">
+<div class="carousel-indicators">
+    {% for slide in carousel.slides.all %}
+    <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="{{ forloop.counter0 }}"
+            class="{% if forloop.first %}active{% endif %}"
+            aria-current="{% if forloop.first %}true{% endif %}"
+            aria-label="Slide {{ forloop.counter }}"></button>
+    {% endfor %}
+</div>
+<div class="carousel-inner">
+    {% for slide in carousel.slides.all %}
+    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+        <img src="{{ slide.image.url }}" alt="{{ slide.headline }}" class="d-block w-100">
+        <div class="container">
+            <div class="carousel-caption {% cycle 'text-start' 'text-center' 'text-end' %}">
+                <h1>{{ slide.headline }}</h1>
+                <p>{{ slide.description }}</p>
+                {% if slide.event %}
+                <p>
+                    <a class="btn btn-lg btn-primary" href="{% url 'events:detail' slide.event.id %}">
+                        {{ slide.button_text }}
+                    </a>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<button class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+</button>
+<button class="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+</button>
+</div>
+
+<div class="container">
+<div class="alert alert-info text-center mt-5">
+    <h2 class="mt-4 mb-4">🎉 Na naszej platformie znajdziesz <strong>{{ total_events_count }}</strong> aktywnych wydarzeń!</h2>
+</div>
+
+<form action="{% url 'events:list' %}" method="get" class="mt-4 mb-4">
+    <div class="row">
+        <div class="col-md-4">
+            <label for="query">Szukaj wydarzenia, miejsca lub artysty</label>
+            <input type="text" id="query" name="query" class="form-control" placeholder="Wpisz nazwę wydarzenia, miejsce lub artystę">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Szukaj</button>
+        </div>
+        <div class="col-md-2">
+            <label for="date_from">Data od</label>
+            <input type="date" id="date_from" name="date_from" class="form-control">
+        </div>
+        <div class="col-md-2">
+            <label for="date_to">Data do</label>
+            <input type="date" id="date_to" name="date_to" class="form-control">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Wszystkie filtry</button>
+        </div>
+    </div>
+</form>
+
+<h1 class="mt-5 mb-4">🎟️ Bilety w promocji</h1>
+{% if promo_tickets|length == 0 %}
+    <p class="text-muted">Brak biletów w promocyjnej cenie.</p>
+{% elif promo_tickets|length <= 4 %}
+    <div class="row">
+        {% for ticket in promo_tickets %}
+        <div class="col-md-3 mb-4">
+            {% include 'events/partials/event_card.html' with event=ticket.event %}
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="horizontal-scroll-container">
+        <div class="row flex-nowrap">
+            {% for ticket in promo_tickets %}
+            <div class="col-md-3 mb-4">
+                {% include 'events/partials/event_card.html' with event=ticket.event %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+<h1 class="mt-5 mb-4">📅 Kalendarium →</h1>
+<div class="btn-group mb-4" role="group">
+    <button class="btn btn-outline-primary filter-btn active" data-period="today">Dziś</button>
+    <button class="btn btn-outline-primary filter-btn" data-period="tomorrow">Jutro</button>
+    <button class="btn btn-outline-primary filter-btn" data-period="day_after_tomorrow">Pojutrze</button>
+    <button class="btn btn-outline-primary filter-btn" data-period="weekend">Weekend</button>
+    <button class="btn btn-outline-primary filter-btn" data-period="next_week">Przyszły tydzień</button>
+</div>
+<div id="events-container" data-url="{% url 'ajax_events_by_period' %}"></div>
+
+<h1 class="mt-5 mb-4">🌆 Wybierz swoje miasto</h1>
+<div class="city-scroll-wrapper">
+    <button id="prev-city-btn" class="scroll-arrow left-arrow" aria-label="Przewiń w lewo">
+        <i class="bi bi-chevron-left"></i>
+    </button>
+
+    <div class="city-scroll-container">
+        <div class="row flex-nowrap align-items-center" id="city-scroll-row">
+            {% for city in popular_cities %}
+            <div class="col-md-2 text-center">
+                <a href="{% url 'events:list' %}?city={{ city.location }}" class="text-decoration-none">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ city.location }}</h5>
+                            <p class="card-text text-muted">{{ city.event_count }} wydarzeń</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <button id="next-city-btn" class="scroll-arrow right-arrow" aria-label="Przewiń w prawo">
+        <i class="bi bi-chevron-right"></i>
+    </button>
+</div>
+
+<h1 class="mt-5 mb-4">🎤 Popularni Artyści</h1>
+{% if popular_performers|length == 0 %}
+    <p class="text-muted">Brak popularnych artystów do wyświetlenia.</p>
+{% elif popular_performers|length <= 6 %}
+    <div class="row">
+        {% for performer in popular_performers %}
+        <div class="col-md-2 mb-4">
+            <div class="card h-100 text-center shadow-sm">
+                <div class="card-body d-flex flex-column align-items-center">
+                    <div class="rounded-circle overflow-hidden bg-light mb-3 rounded-circle-image-container">
+                        {% if performer.performer_image %}
+                            <img src="{{ performer.performer_image.url }}" class="img-fluid" alt="{{ performer.name }}">
+                        {% else %}
+                            <img src="https://via.placeholder.com/120" class="img-fluid" alt="Placeholder">
+                        {% endif %}
+                    </div>
+                    <h5 class="card-title">{{ performer.name }}</h5>
+                    {% with primary_event=performer.get_primary_event %}
+                        {% if primary_event %}
+                            <p class="card-text small text-muted">
+                                <strong>
+                                    <a href="{% url 'events:detail' primary_event.id %}" class="text-decoration-none text-dark">
+                                        {{ primary_event.name }}
+                                    </a>
+                                </strong><br>
+                                {{ primary_event.date|date:"D, d.m.Y, H:i" }}
+                            </p>
+                            {% if performer.event_count > 1 %}
+                                <p class="card-text text-primary small">
+                                    +{{ performer.event_count|add:"-1" }} inne wydarzenia
+                                </p>
+                            {% endif %}
+                        {% else %}
+                            <p class="card-text text-muted small">Brak powiązanych wydarzeń</p>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+                <div class="card-footer bg-transparent border-0 mt-auto">
+                    <a href="{% url 'events:performer_detail' performer.id %}" class="btn btn-outline-primary btn-sm w-75">
+                        Zobacz więcej
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="horizontal-scroll-container">
+        <div class="row flex-nowrap">
+            {% for performer in popular_performers %}
+            <div class="col-md-2 mb-4">
+                <div class="card h-100 text-center shadow-sm">
+                    <div class="card-body d-flex flex-column align-items-center">
+                        <div class="rounded-circle overflow-hidden bg-light mb-3 rounded-circle-image-container">
+                            {% if performer.performer_image %}
+                                <img src="{{ performer.performer_image.url }}" class="img-fluid" alt="{{ performer.name }}">
+                            {% else %}
+                                <img src="https://via.placeholder.com/120" class="img-fluid" alt="Placeholder">
+                            {% endif %}
+                        </div>
+                        <h5 class="card-title">{{ performer.name }}</h5>
+                        {% with primary_event=performer.get_primary_event %}
+                            {% if primary_event %}
+                                <p class="card-text small text-muted">
+                                    <strong>
+                                        <a href="{% url 'events:detail' primary_event.id %}" class="text-decoration-none text-dark">
+                                            {{ primary_event.name }}
+                                        </a>
+                                    </strong><br>
+                                    {{ primary_event.date|date:"D, d.m.Y, H:i" }}
+                                </p>
+                                {% if performer.event_count > 1 %}
+                                    <p class="card-text text-primary small">
+                                        +{{ performer.event_count|add:"-1" }} inne wydarzenia
+                                    </p>
+                                {% endif %}
+                            {% else %}
+                                <p class="card-text text-muted small">Brak powiązanych wydarzeń</p>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                    <div class="card-footer bg-transparent border-0 mt-auto">
+                        <a href="{% url 'events:performer_detail' performer.id %}" class="btn btn-outline-primary btn-sm w-75">
+                            Zobacz więcej
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+<h1 class="mt-5 mb-4">⭐ Popularne wydarzenia</h1>
+{% if popular_events|length == 0 %}
+    <p class="text-muted">Brak popularnych wydarzeń do wyświetlenia.</p>
+{% elif popular_events|length <= 4 %}
+    <div class="row">
+        {% for event in popular_events %}
+        <div class="col-md-3 mb-4">
+            {% include 'events/partials/event_card.html' with event=event %}
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="horizontal-scroll-container">
+        <div class="row flex-nowrap">
+            {% for event in popular_events %}
+            <div class="col-md-3 mb-4">
+                {% include 'events/partials/event_card.html' with event=event %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+<h1 class="mt-5 mb-4">📂 Może to Cię zainteresuje? Z kategorii: {{ random_category.name }}</h1>
+{% if category_events|length == 0 %}
+    <p class="text-muted">Brak wydarzeń w tej kategorii.</p>
+{% elif category_events|length <= 4 %}
+    <div class="row">
+        {% for event in category_events %}
+        <div class="col-md-3 mb-4">
+            {% include 'events/partials/event_card.html' with event=event %}
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="horizontal-scroll-container">
+        <div class="row flex-nowrap">
+            {% for event in category_events %}
+            <div class="col-md-3 mb-4">
+                {% include 'events/partials/event_card.html' with event=event %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+<h1 class="mt-5 mb-4">🔥 Popularne tagi</h1>
+<div class="mb-4">
+    {% for tag in popular_tags %}
+    <a href="{% url 'events:list' %}?tag={{ tag.id }}" class="badge bg-primary fs-6 m-1 text-decoration-none">
+        {{ tag.name }} ({{ tag.event_count }})
+    </a>
+    {% empty %}
+    <p>Brak popularnych tagów.</p>
+    {% endfor %}
+</div>
+
+<h1 class="mt-5 mb-4">🔥 Nowo dodane wydarzenia</h1>
+{% if newly_added_events|length == 0 %}
+    <p class="text-muted">Brak nowo dodanych wydarzeń.</p>
+{% elif newly_added_events|length <= 4 %}
+    <div class="row">
+        {% for event in newly_added_events %}
+        <div class="col-md-3 mb-4">
+            {% include 'events/partials/event_card.html' with event=event %}
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="horizontal-scroll-container">
+        <div class="row flex-nowrap">
+            {% for event in newly_added_events %}
+            <div class="col-md-3 mb-4">
+                {% include 'events/partials/event_card.html' with event=event %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+<h1 class="mt-5 mb-4 d-flex align-items-center">🌆 Wydarzenia w mieście:
+    <form method="get" class="ms-3" id="city-select-form">
+        <label for="city_select"></label>
+        <select name="city" id="city_select" class="form-select d-inline-block w-auto">
+            <option value="">Losowe miasto</option>
+            {% for c in cities %}
+            <option value="{{ c }}" {% if c == city_for_events %}selected{% endif %}>
+                {{ c }}
+            </option>
+            {% endfor %}
+        </select>
+    </form>
+</h1>
+{% if city_events|length == 0 %}
+    <p class="text-muted">Brak wydarzeń w tym mieście.</p>
+{% elif city_events|length <= 4 %}
+    <div class="row" id="city-events-container" data-ajax-url="{% url 'ajax_city_events' %}">
+        {% include "main/partials/city_events_partial.html" %}
+    </div>
+{% else %}
+    <div class="horizontal-scroll-container">
+        <div class="row flex-nowrap" id="city-events-container" data-ajax-url="{% url 'ajax_city_events' %}">
+            {% include "main/partials/city_events_partial.html" %}
+        </div>
+    </div>
+{% endif %}
+
+{% if popular_tag %}
+    <h1 class="mt-5 mb-4">🏆 Najpopularniejszy tag: <span class="badge bg-primary">{{ popular_tag.name }}</span></h1>
+    <p class="text-muted">Liczba wyświetleń: {{ popular_tag.views_count }}</p>
+    {% if tag_events|length == 0 %}
+        <p class="text-muted">Brak wydarzeń powiązanych z tym tagiem.</p>
+    {% elif tag_events|length <= 4 %}
+        <div class="row">
+            {% for event in tag_events %}
+            <div class="col-md-3 mb-4">
+                {% include 'events/partials/event_card.html' with event=event %}
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="horizontal-scroll-container">
+            <div class="row flex-nowrap">
+                {% for event in tag_events %}
+                <div class="col-md-3 mb-4">
+                    {% include 'events/partials/event_card.html' with event=event %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+{% else %}
+    <p>Brak popularnych tagów do wyświetlenia.</p>
+{% endif %}
+
+<h1 class="mt-5 mb-4 d-flex align-items-center">📂 Wydarzenia w kategorii:
+    <form method="get" class="ms-3" id="category-select-form">
+        <label for="category_select"></label>
+        <select name="category" id="category_select" class="form-select d-inline-block w-auto">
+            <option value="">Losowa kategoria</option>
+            {% for category in categories %}
+            <option value="{{ category.id }}" {% if category == random_category %}selected{% endif %}>
+                {{ category.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </form>
+</h1>
+{% if category_events|length == 0 %}
+    <p class="text-muted">Brak wydarzeń w wybranej kategorii.</p>
+{% elif category_events|length <= 4 %}
+    <div class="row" id="category-events-container" data-ajax-url="{% url 'ajax_category_events' %}">
+        {% include "main/partials/category_events_partial.html" %}
+    </div>
+{% else %}
+    <div class="horizontal-scroll-container">
+        <div class="row flex-nowrap" id="category-events-container" data-ajax-url="{% url 'ajax_category_events' %}">
+            {% include "main/partials/category_events_partial.html" %}
+        </div>
+    </div>
+{% endif %}
+
+<h1 class="mt-5 mb-4">📅 Nadchodzące wydarzenia</h1>
+{% if upcoming_events|length == 0 %}
+    <p class="text-muted">Brak nadchodzących wydarzeń.</p>
+{% elif upcoming_events|length <= 4 %}
+    <div class="row">
+        {% for event in upcoming_events %}
+        <div class="col-md-3 mb-4">
+            {% include 'events/partials/event_card.html' with event=event %}
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="horizontal-scroll-container">
+        <div class="row flex-nowrap">
+            {% for event in upcoming_events %}
+            <div class="col-md-3 mb-4">
+                {% include 'events/partials/event_card.html' with event=event %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+<h1 class="mt-5 mb-4 d-flex align-items-center">🎤 Wydarzenia z artystą:
+    <form method="get" class="ms-3" id="artist-select-form">
+        <label for="artist_select"></label>
+        <select name="artist" id="artist_select" class="form-select d-inline-block w-auto">
+            <option value="">Losowy artysta</option>
+            {% for artist in performers %}
+            <option value="{{ artist.id }}">{{ artist.name }}</option>
+            {% endfor %}
+        </select>
+    </form>
+</h1>
+<div id="artist-events-container" data-ajax-url="{% url 'ajax_artist_events' %}">
+    {% include "main/partials/artist_events_partial.html" %}
+</div>
+
+<h1 class="mt-5 mb-4">🌟 Polecane wydarzenia</h1>
+{% if featured_events|length == 0 %}
+    <p class="text-muted">Brak polecanych wydarzeń.</p>
+{% elif featured_events|length <= 4 %}
+    <div class="row">
+        {% for event in featured_events %}
+        <div class="col-md-3 mb-4">
+            {% include 'events/partials/event_card.html' with event=event %}
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="horizontal-scroll-container">
+        <div class="row flex-nowrap">
+            {% for event in featured_events %}
+            <div class="col-md-3">
+                {% include 'events/partials/event_card.html' with event=event %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+<h1 class="mt-5 mb-4 d-flex align-items-center">🏷️ Wydarzenia z tagiem:
+    <form method="get" class="ms-3" id="tag-select-form">
+        <label for="tag_select"></label>
+        <select name="tag" id="tag_select" class="form-select d-inline-block w-auto">
+            <option value="">Losowy tag</option>
+            {% for tag in popular_tags %}
+            <option value="{{ tag.id }}" {% if tag == popular_tag %}selected{% endif %}>
+                {{ tag.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </form>
+</h1>
+{% if tag_events|length == 0 %}
+    <p class="text-muted">Brak wydarzeń powiązanych z tym tagiem.</p>
+{% elif tag_events|length <= 4 %}
+    <div class="row" id="tag-events-container" data-ajax-url="{% url 'ajax_tag_events' %}">
+        {% include "main/partials/tag_events_partial.html" %}
+    </div>
+{% else %}
+    <div class="horizontal-scroll-container">
+        <div class="row flex-nowrap" id="tag-events-container" data-ajax-url="{% url 'ajax_tag_events' %}">
+            {% include "main/partials/tag_events_partial.html" %}
+        </div>
+    </div>
+{% endif %}
+
+<h1 class="mt-5 mb-4">📅 Wydarzenia w tym tygodniu</h1>
+{% if upcoming_week_events|length == 0 %}
+    <p class="text-muted">Brak wydarzeń w tym tygodniu.</p>
+{% elif upcoming_week_events|length <= 4 %}
+    <div class="row">
+        {% for event in upcoming_week_events %}
+        <div class="col-md-3">
+            {% include 'events/partials/event_card.html' with event=event %}
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="horizontal-scroll-container">
+        <div class="row flex-nowrap">
+            {% for event in upcoming_week_events %}
+            <div class="col-md-3">
+                {% include 'events/partials/event_card.html' with event=event %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+<h1 class="mt-5 mb-4">👶 Wydarzenia z kategorii <strong>DLA DZIECI</strong></h1>
+{% if kids_events|length == 0 %}
+    <p class="text-muted">Brak wydarzeń dla dzieci.</p>
+{% elif kids_events|length <= 4 %}
+    <div class="row">
+        {% for event in kids_events %}
+        <div class="col-md-3">
+            {% include 'events/partials/event_card.html' with event=event %}
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="horizontal-scroll-container">
+        <div class="row flex-nowrap">
+            {% for event in kids_events %}
+            <div class="col-md-3">
+                {% include 'events/partials/event_card.html' with event=event %}
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+{% endif %}
+</div>
+
+<div class="container mt-5 mb-5">
+<div class="card">
+    <div class="row">
+        <div class="col-md-6 d-flex align-items-center justify-content-center bg-primary text-white p-4">
+            <div>
+                <h2 class="fw-bold">Dołącz do naszego Newslettera!</h2>
+                <p class="fs-5">Bądź na bieżąco z najnowszymi wydarzeniami, promocjami i atrakcjami.</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="p-4">
+                <form method="post" action="{% url 'add:subscribe' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Imię</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Jan" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Adres e-mail</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="jan@kowalski.pl" required>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="terms" name="terms" required>
+                        <label class="form-check-label" for="terms">
+                            Akceptuję <a href="{% url 'add:newsletter_terms' %}" target="_blank">Regulamin Newslettera</a>
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Zapisz się</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script src="{% static 'js/tag_events.js' %}"></script>
+<script src="{% static 'js/artist_events.js' %}"></script>
+<script src="{% static 'js/events_filter.js' %}"></script>
+<script src="{% static 'js/category_events.js' %}"></script>
+<script src="{% static 'js/city_events.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+
+{% endblock %}

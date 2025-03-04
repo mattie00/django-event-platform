@@ -1,0 +1,107 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}Finalizacja Zamówienia{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1 class="mt-5 mb-4">Finalizacja Zamówienia</h1>
+
+    {% if messages %}
+      {% for message in messages %}
+        {% if 'checkout' in message.tags %}
+          <div class="alert alert-info {{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Dane Osobowe</h4>
+                <div class="mb-3">
+                    <label>Imię</label>
+                    <input type="text" name="first_name" class="form-control"
+                           value="{% if user %}{{ first_name|default:user.first_name }}{% else %}{{ first_name|default:'' }}{% endif %}"
+                           required>
+                </div>
+                <div class="mb-3">
+                    <label>Nazwisko</label>
+                    <input type="text" name="last_name" class="form-control"
+                           value="{% if user %}{{ last_name|default:user.last_name }}{% else %}{{ last_name|default:'' }}{% endif %}"
+                           required>
+                </div>
+                <div class="mb-3">
+                    <label>E-mail</label>
+                    <input type="email" name="email" class="form-control"
+                           value="{% if user %}{{ email|default:user.email }}{% else %}{{ email|default:'' }}{% endif %}"
+                           required>
+                </div>
+                <div class="mb-3">
+                    <label>Numer Telefonu</label>
+                    <input type="text" name="phone" class="form-control"
+                           value="{% if user %}{{ phone|default:user.phone_number }}{% else %}{{ phone|default:'' }}{% endif %}"
+                           required>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h4>Metoda Płatności</h4>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="payment_method" value="transfer"
+                           {% if payment_method == "transfer" or not payment_method %}checked{% endif %}>
+                    <label class="form-check-label">Przelew tradycyjny</label>
+                </div>
+                <div class="form-check mb-4">
+                    <input class="form-check-input" type="radio" name="payment_method" value="card"
+                           {% if payment_method == "card" %}checked{% endif %}>
+                    <label class="form-check-label">Karta płatnicza</label>
+                </div>
+            </div>
+        </div>
+
+        <h4 class="mt-4">Podsumowanie Zamówienia</h4>
+        <ul class="list-group mb-4">
+            {% for item in cart_items %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ item.ticket_pool.event.name }} - {{ item.ticket_pool.name }} ({{ item.quantity }} x {{ item.price|default:item.ticket_pool.current_price }} zł)
+                </li>
+            {% endfor %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <strong>Łączna suma:</strong>
+                <strong>{{ total_price }} zł</strong>
+            </li>
+        </ul>
+
+        {% if total_tickets > 0 %}
+            <h4 class="mt-4">Dane do biletów</h4>
+            <p>Wprowadź imię i nazwisko dla każdego biletu. Liczba biletów: {{ total_tickets }}.</p>
+            {{ formset.management_form }}
+            <div class="row gy-3">
+                {% for ticket in tickets_with_forms %}
+                    <div class="mb-3 border p-3 rounded">
+                        <h5 class="mb-3">
+                            Bilet nr {{ forloop.counter }} z {{ total_tickets }}
+                            <small class="text-muted">- Wydarzenie: {{ ticket.event_name }}</small>
+                        </h5>
+                        <div class="mb-3">
+                            <label class="form-label">Imię</label>
+                            <input type="text" name="{{ ticket.form.first_name.html_name }}"
+                                   class="form-control" value="{{ ticket.form.first_name.value|default:'' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nazwisko</label>
+                            <input type="text" name="{{ ticket.form.last_name.html_name }}"
+                                   class="form-control" value="{{ ticket.form.last_name.value|default:'' }}" required>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-success btn-lg w-100 mt-4">Złóż Zamówienie</button>
+    </form>
+</div>
+{% endblock %}

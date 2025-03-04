@@ -1,0 +1,21 @@
+{% if city_events|length == 0 %}
+    <p>Brak wydarzeń w tym mieście.</p>
+{% elif city_events|length <= 4 %}
+    <div class="row">
+        {% for event in city_events %}
+        <div class="col-md-3 mb-4">
+            {% include 'events/partials/event_card.html' with event=event %}
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="horizontal-scroll-container">
+        <div class="row flex-nowrap">
+            {% for event in city_events %}
+            <div class="col-md-3 mb-4">
+                {% include 'events/partials/event_card.html' with event=event %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}

@@ -1,0 +1,45 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}{{ performer.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row align-items-center mb-4">
+        <div class="col-md-4 text-center">
+            <div class="rounded-circle overflow-hidden bg-light shadow-sm mb-3" style="width: 200px; height: 200px; margin: 0 auto;">
+                {% if performer.performer_image %}
+                    <img src="{{ performer.performer_image.url }}" alt="{{ performer.name }}" class="img-fluid"
+                         style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                    <img src="https://via.placeholder.com/200" alt="Placeholder" class="img-fluid">
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <h1 class="fw-bold">{{ performer.name }}</h1>
+            <p><strong>👁️ Wyświetlenia:</strong> {{ performer.performer_views_count }}</p>
+            <p><strong>⭐ Ilość powiązanych wydarzeń:</strong> {{ event_count }}</p>
+            <p class="text-muted">Sprawdź wydarzenia, w których bierze udział!</p>
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    <h2 class="mb-4">🎟️ Powiązane Wydarzenia</h2>
+    <div class="row">
+        {% for event in related_events %}
+            <div class="col-md-3">
+                {% include 'events/partials/event_card.html' with event=event %}
+            </div>
+        {% empty %}
+            <p class="text-center text-muted">Brak powiązanych wydarzeń.</p>
+        {% endfor %}
+    </div>
+
+    <div class="text-center mt-5">
+        <a href="{% url 'events:list' %}" class="btn btn-outline-primary btn-lg">← Powrót do listy wydarzeń</a>
+    </div>
+</div>
+{% endblock %}

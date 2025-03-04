@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8" />
+    <title>Płatność</title>
+</head>
+<body style="font-family: Arial, sans-serif; font-size:14px; color:#333;">
+    <p>Witaj {{ order.first_name }},</p>
+    <p>Dziękujemy za złożenie zamówienia! Aby je opłacić, kliknij w poniższy link:</p>
+    <p>
+        <a href="{{ payment_url }}" style="color: #007bff; text-decoration: none;">
+            Opłać zamówienie
+        </a>
+    </p>
+    <p>Po opłaceniu zamówienia, bilety zostaną automatycznie przesłane na Twój adres e-mail.</p>
+    <p>Zespół ...</p>
+</body>
+</html>

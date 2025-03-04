@@ -1,0 +1,16 @@
+{% extends 'main/base.html' %}
+{% block title %}Twoje Ulubione{% endblock %}
+{% block content %}
+<div class="container my-4">
+    <h1 class="mt-5 mb-4">Twoje Ulubione Wydarzenia</h1>
+    <div class="row">
+        {% for event in favorite_events %}
+            <div class="col-md-3 mb-4">
+                {% include 'events/partials/event_card.html' with event=event %}
+            </div>
+        {% empty %}
+            <p>Brak ulubionych wydarzeń.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

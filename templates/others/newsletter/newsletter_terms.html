@@ -1,0 +1,14 @@
+{% extends "main/base.html" %}
+
+{% block title %}Regulamin Newslettera{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center mb-4">Regulamin Newslettera</h1>
+    <p class="text-muted mb-4">Ostatnia aktualizacja: {{ current_date }}</p>
+    <p>1. Newsletter jest usługą bezpłatną.</p>
+    <p>2. Użytkownik, podając swój adres e-mail i imię, wyraża zgodę na przesyłanie informacji marketingowych.</p>
+    <p>3. W każdej chwili można zrezygnować z subskrypcji poprzez kliknięcie linku w wiadomości e-mail.</p>
+    <p>4. Twoje dane będą przetwarzane zgodnie z <a href="{% url 'add:privacy_policy' %}">polityką prywatności</a>.</p>
+</div>
+{% endblock %}

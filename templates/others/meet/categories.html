@@ -1,0 +1,21 @@
+{% extends "main/base.html" %}
+
+{% block title %}Kategorie{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Kategorie</h1>
+    <p>Przeglądaj wydarzenia według kategorii, takich jak teatr, muzyka, stand-up czy kino.</p>
+
+    <h2>Popularne kategorie</h2>
+    <div class="row">
+        {% for category in categories %}
+            <div class="col-md-3 mb-4">
+                <a href="{% url 'events:list' %}?category={{ category.id }}" class="btn btn-outline-primary w-100">
+                    {{ category.name }}
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

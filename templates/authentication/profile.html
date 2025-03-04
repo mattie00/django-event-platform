@@ -1,0 +1,131 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Profil użytkownika{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="list-group">
+                <a href="#your-data"
+                   class="list-group-item list-group-item-action {% if active_tab == 'your-data' %}active{% endif %}"
+                   data-bs-toggle="tab">
+                    Twoje dane
+                </a>
+                <a href="#your-tickets"
+                   class="list-group-item list-group-item-action {% if active_tab == 'your-tickets' %}active{% endif %}"
+                   data-bs-toggle="tab">
+                    Zakupione bilety
+                </a>
+                <a href="#change-password"
+                   class="list-group-item list-group-item-action {% if active_tab == 'change-password' %}active{% endif %}"
+                   data-bs-toggle="tab">
+                    Zmień hasło
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="tab-content">
+                <div class="tab-pane fade {% if active_tab == 'your-data' %}show active{% endif %}" id="your-data">
+                    <h3>Twoje dane</h3>
+                    <form method="post" action="{% url 'update_profile' %}">
+                        {% csrf_token %}
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="first_name" name="first_name" placeholder="Imię" value="{{ user.first_name }}" required>
+                            <label for="first_name">Imię</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Nazwisko" value="{{ user.last_name }}" required>
+                            <label for="last_name">Nazwisko</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Adres email" value="{{ user.email }}" required>
+                            <label for="email">Adres email</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="phone_number" name="phone_number" placeholder="Numer telefonu" value="{{ user.phone_number }}">
+                            <label for="phone_number">Numer telefonu</label>
+                        </div>
+
+                        {% for message in messages %}
+                            {% if 'profile' in message.tags %}
+                                <div class="alert alert-{{ message.level_tag }}" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+
+                        <button type="submit" class="btn btn-primary">Zapisz</button>
+                    </form>
+                </div>
+
+                <div class="tab-pane fade {% if active_tab == 'your-tickets' %}show active{% endif %}" id="your-tickets">
+                    <h3>Zakupione bilety</h3>
+                    {% if tickets %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Wydarzenie</th>
+                                        <th>Data</th>
+                                        <th>Miejsce</th>
+                                        <th>Numer biletu</th>
+                                        <th>Imię i Nazwisko</th>
+                                        <th>QR Kod</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ticket in tickets %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ ticket.order_item.ticket_pool.event.name }}</td>
+                                            <td>{{ ticket.order_item.ticket_pool.event.date }}</td>
+                                            <td>{{ ticket.order_item.ticket_pool.event.location }} - {{ ticket.order_item.ticket_pool.event.address }}</td>
+                                            <td>{{ ticket.ticket_number }}</td>
+                                            <td>{{ ticket.first_name }} {{ ticket.last_name }}</td>
+                                            <td>
+                                                <img src="data:image/png;base64,{{ ticket.qr_code }}" alt="QR Code" width="100">
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p>Nie masz jeszcze zakupionych biletów.</p>
+                    {% endif %}
+                </div>
+                <div class="tab-pane fade {% if active_tab == 'change-password' %}show active{% endif %}" id="change-password">
+                    <h3>Zmień hasło</h3>
+                    <form method="post" action="{% url 'change_password' %}">
+                        {% csrf_token %}
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="old_password" name="old_password" placeholder="Stare hasło" required>
+                            <label for="old_password">Stare hasło</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="new_password" name="new_password" placeholder="Nowe hasło" required>
+                            <label for="new_password">Nowe hasło</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Potwierdź hasło" required>
+                            <label for="confirm_password">Potwierdź nowe hasło</label>
+                        </div>
+                        {% for message in messages %}
+                            {% if 'password_reset' in message.tags %}
+                                <div class="alert alert-{{ message.level_tag }}" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+
+                        <button type="submit" class="btn btn-primary">Zmień hasło</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

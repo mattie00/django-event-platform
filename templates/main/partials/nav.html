@@ -1,0 +1,82 @@
+<nav class="py-0 bg-body-tertiary">
+    <div class="container d-flex flex-wrap justify-content-md-between ">
+        <ul class="nav align-items-center">
+            <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2"><strong>+48 000 000 000</strong> </a></li>
+            <li><a class="px-2 text-dark text-decoration-none px-2">Infolinia czynna od poniedziałku do piątku w godzinach <strong>10:00-17:00</strong>.</a></li>
+        </ul>
+        <ul class="nav">
+            <li class="nav-item"><a href="{% url 'add:partnership' %}" class="nav-link link-body-emphasis px-2">wspólpraca</a></li>
+            <li class="nav-item"><a href="{% url 'add:page' %}" class="nav-link link-body-emphasis px-2">newsletter</a></li>
+        </ul>
+    </div>
+</nav>
+<nav class="sticky-nav">
+    <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+            <div class="col-md-3 mb-2 mb-md-0">
+                <a class="fs-4 text-dark text-decoration-none fw-medium" href="{% url 'home' %}"><strong>NAZWA</strong></a>
+            </div>
+
+            <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+                {% for category in random_categories %}
+                    <li>
+                        <a href="{% url 'events:list' %}?category={{ category.id }}" class="nav-link px-2">
+                            {{ category.name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <div class="col-md-3 d-flex align-items-center justify-content-end">
+                <div class="position-relative d-inline-block">
+                    <a href="{% url 'events:favorites' %}" class="mx-2 text-dark fs-6">
+                        <i class="bi bi-heart-fill"></i>
+                        {% if favorite_events %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {{ favorite_events|length }}
+                            </span>
+                        {% endif %}
+                    </a>
+
+                </div>
+                <div class="position-relative d-inline-block mx-4">
+                    <a href="{% url 'orders:cart' %}" class="mx-2 text-dark fs-6">
+                        <i class="bi bi-cart-fill"></i>
+                    </a>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        {{ cart_item_count }}
+                        <span class="visually-hidden">liczba przedmiotów w koszyku</span>
+                    </span>
+                </div>
+
+
+                {% if user.is_authenticated and user.is_superuser %}
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            Witaj, {{ user.first_name }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                            <li><a class="dropdown-item" href="{% url 'admin:index' %}">Panel administratora</a></li>
+                            <li><a class="dropdown-item" href="{% url 'profile' %}">Profil</a></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">Wyloguj</a></li>
+                        </ul>
+                    </div>
+                {% elif user.is_authenticated %}
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            Witaj, {{ user.first_name }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                            <li><a class="dropdown-item" href="{% url 'profile' %}">Profil</a></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">Wyloguj</a></li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-primary mx-2">Zaloguj</a>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</nav>
+

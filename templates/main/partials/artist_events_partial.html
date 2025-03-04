@@ -1,0 +1,11 @@
+{% if artist_events %}
+<div class="row">
+    {% for event in artist_events %}
+    <div class="col-md-3 mb-4">
+        {% include "events/partials/event_card.html" with event=event %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-muted">Brak wydarzeń dla wybranego artysty.</p>
+{% endif %}

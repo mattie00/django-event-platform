@@ -1,0 +1,31 @@
+{% extends "main/base.html" %}
+
+{% block title %}Opłać zamówienie{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1 class="mt-5 mb-4">Opłać swoje zamówienie</h1>
+
+    <p>Zamówienie nr: <strong>{{ order.id }}</strong></p>
+    <ul class="list-group mb-3">
+        {% for item in items %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ item.ticket_pool.event.name }} - {{ item.ticket_pool.name }} ({{ item.quantity }} x {{ item.price }} zł)
+            </li>
+        {% endfor %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <strong>Łączna suma:</strong>
+            <strong>{{ total_price|floatformat:2 }} zł</strong>
+        </li>
+    </ul>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="payment_code" class="form-label"><strong>Jest to symulacja bramki płatniczej. Wprowadź kod "123456" aby dokończyć!</strong></label>
+            <input type="text" id="payment_code" name="payment_code" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-success">Opłać zamówienie</button>
+    </form>
+</div>
+{% endblock %}

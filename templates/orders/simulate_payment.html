@@ -1,0 +1,58 @@
+{% extends "main/base.html" %}
+
+{% block title %}Symulacja Płatności{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1 class="mt-5 mb-4">Symulacja Płatności</h1>
+    <p>Wprowadź kod płatności, aby zakończyć transakcję. Kod testowy: <strong>123456</strong></p>
+
+    {% if order.payment_method == 'transfer' %}
+        <p>Wybrana metoda płatności: <strong>Przelew tradycyjny</strong>.</p>
+    {% elif order.payment_method == 'card' %}
+        <p>Wybrana metoda płatności: <strong>Karta płatnicza</strong>.</p>
+    {% endif %}
+
+    <h4>Podsumowanie zamówienia:</h4>
+    <ul class="list-group mb-3">
+        {% for item in items %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ item.ticket_pool.event.name }} - {{ item.ticket_pool.name }} ({{ item.quantity }} x {{ item.price }} zł)
+            </li>
+        {% endfor %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <strong>Łączna suma:</strong>
+            <strong>Łączna suma:</strong> {{ total_price|floatformat:2 }} zł
+        </li>
+    </ul>
+
+    {% if messages %}
+        {% for message in messages %}
+            {% if 'simulate_payment' in message.tags %}
+                {% if 'error' in message.tags %}
+                    <div class="alert alert-danger my-2" role="alert">
+                        {{ message }}
+                    </div>
+                {% elif 'success' in message.tags %}
+                    <div class="alert alert-success my-2" role="alert">
+                        {{ message }}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info my-2" role="alert">
+                        {{ message }}
+                    </div>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="payment_code" class="form-label">Kod Płatności</label>
+            <input type="text" id="payment_code" name="payment_code" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Prześlij</button>
+    </form>
+</div>
+{% endblock %}

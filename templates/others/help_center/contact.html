@@ -1,0 +1,35 @@
+{% extends "main/base.html" %}
+
+{% block title %}Kontakt{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Kontakt</h1>
+    <p>Jeśli masz pytania lub potrzebujesz pomocy, skontaktuj się z nami za pomocą poniższych danych lub formularza kontaktowego.</p>
+
+    <h2>Dane kontaktowe</h2>
+    <ul>
+        <li><strong>Email:</strong> kontakt@bilecik.pl</li>
+        <li><strong>Telefon:</strong> +48 999 999 999</li>
+        <li><strong>Godziny pracy infolinii:</strong> Poniedziałek - Piątek, 10:00 - 17:00</li>
+    </ul>
+
+    <h2>Formularz kontaktowy</h2>
+    <form method="post" action="">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="name" class="form-label">Imię i nazwisko</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Wpisz swoje imię i nazwisko" required>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Adres email</label>
+            <input type="email" class="form-control" id="email" name="email" placeholder="Wpisz swój adres email" required>
+        </div>
+        <div class="mb-3">
+            <label for="message" class="form-label">Wiadomość</label>
+            <textarea class="form-control" id="message" name="message" rows="4" placeholder="Wpisz swoją wiadomość" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Wyślij wiadomość</button>
+    </form>
+</div>
+{% endblock %}

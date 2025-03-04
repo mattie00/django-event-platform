@@ -1,0 +1,27 @@
+# Pliki kompilowane Pythona
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Folder z wirtualnym środowiskiem
+.venv/
+venv/
+env/
+
+# Pliki z danymi środowiskowymi
+.env
+*.env
+config/settings_local.py
+
+# Pliki uploadów
+/media/
+
+# Pliki konfiguracyjne PyCharm
+.idea/
+.vscode/
+
+# Pliki logów
+*.log
+logs/
+debug.log

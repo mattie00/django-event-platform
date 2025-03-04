@@ -1,0 +1,84 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Rejestracja{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row d-flex justify-content-center align-items-center">
+        <div class="col-6 d-flex flex-column justify-content-center align-items-center text-start">
+            <h1 class="h2 w-75">Zarejestruj się i dołącz do naszej społeczności!</h1>
+            <p class="mt-3 w-75">
+                <span>Zarejestruj się, aby móc korzystać z naszych usług. Jeśli posiadasz już konto, </span>
+                <a href="{% url 'login' %}" class="text-primary text-decoration-none">zaloguj się</a>.
+            </p>
+        </div>
+        <div class="col-6 text-center">
+            <form method="post" action="{% url 'register' %}" class="py-5">
+                {% csrf_token %}
+
+                <h1 class="h3 mb-3 fw-normal">Rejestracja</h1>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if 'user_register' in message.tags %}
+                            {% if 'error' in message.tags %}
+                                <div class="alert alert-danger w-75 mx-auto" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% elif 'success' in message.tags %}
+                                <div class="alert alert-success w-75 mx-auto" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info w-75 mx-auto" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                <div class="form-floating mb-3 w-75 mx-auto">
+                    <input type="email" class="form-control" id="floatingEmail" name="email" placeholder="Adres email" required>
+                    <label for="floatingEmail">Adres email</label>
+                </div>
+
+                <div class="form-floating mb-3 w-75 mx-auto">
+                    <input type="text" class="form-control" id="floatingFirstName" name="first_name" placeholder="Imię" required>
+                    <label for="floatingFirstName">Imię</label>
+                </div>
+
+                <div class="form-floating mb-3 w-75 mx-auto">
+                    <input type="text" class="form-control" id="floatingLastName" name="last_name" placeholder="Nazwisko" required>
+                    <label for="floatingLastName">Nazwisko</label>
+                </div>
+
+                <div class="form-floating mb-3 w-75 mx-auto">
+                    <input type="text" class="form-control" id="floatingPhoneNumber" name="phone_number" placeholder="Numer telefonu" required>
+                    <label for="floatingPhoneNumber">Numer telefonu</label>
+                </div>
+
+                <div class="form-floating mb-3 w-75 mx-auto">
+                    <input type="password" class="form-control" id="floatingPassword" name="password" placeholder="Hasło" required>
+                    <label for="floatingPassword">Hasło</label>
+                </div>
+
+                <div class="form-floating mb-3 w-75 mx-auto">
+                    <input type="password" class="form-control" id="floatingConfirmPassword" name="confirm_password" placeholder="Potwierdź hasło" required>
+                    <label for="floatingConfirmPassword">Potwierdź hasło</label>
+                </div>
+
+                <div class="form-check text-start my-3 w-75 mx-auto">
+                    <input class="form-check-input" type="checkbox" name="terms" id="flexCheckTerms" required>
+                    <label class="form-check-label" for="flexCheckTerms">
+                        <span>Akceptuję </span>
+                        <a href="{% url 'add:terms' %}" class="text-primary text-decoration-none">regulamin</a>
+                    </label>
+                </div>
+
+                <button class="btn btn-primary w-50 py-2" type="submit">Zarejestruj się</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

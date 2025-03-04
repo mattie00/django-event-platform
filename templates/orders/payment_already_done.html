@@ -1,0 +1,11 @@
+{% extends "main/base.html" %}
+
+{% block title %}Zamówienie opłacone{% endblock %}
+
+{% block content %}
+<div class="container my-4 text-center">
+    <h1>Zamówienie zostało już opłacone</h1>
+    <p>Dziękujemy za Twoje zamówienie. Bilety zostały przesłane na Twój adres e-mail.</p>
+    <a href="{% url 'home' %}" class="btn btn-primary">Powrót na stronę główną</a>
+</div>
+{% endblock %}
